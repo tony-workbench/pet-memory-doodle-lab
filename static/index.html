@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f6f4ed">
+    <title>Pet Memory Doodle Lab · 宠物记忆小画室</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#scene">跳到场景输入</a>
+    <div class="page-shell">
+      <header class="masthead">
+        <a class="wordmark" href="/" aria-label="Pet Memory Doodle Lab 首页">
+          <span class="brand-mark" aria-hidden="true">✳</span>
+          <span>Pet Memory<span class="wordmark-sub">DOODLE LAB</span></span>
+        </a>
+        <div class="connection">
+          <span id="config-status" class="status-pill" role="status"><span class="status-dot" aria-hidden="true"></span><span id="config-label">正在检查服务</span></span>
+          <button id="config-retry" class="text-button config-retry" type="button" hidden>重新检查</button>
+        </div>
+      </header>
+
+      <main>
+        <section class="intro" aria-labelledby="page-title">
+          <p class="eyebrow">A SMALL MOMENT, A FEW LITTLE LINES.</p>
+          <h1 id="page-title">和它的一刻，<br class="mobile-break">留在纸上。</h1>
+          <p class="intro-copy">写下一个小场景，用几笔黑色圆珠笔线条，画成一张宠物记忆。</p>
+        </section>
+
+        <div class="workspace">
+          <section class="editor" aria-labelledby="editor-heading">
+            <div class="section-heading"><span class="step-number">01</span><h2 id="editor-heading">记下这一刻</h2></div>
+            <form id="doodle-form">
+              <div class="presets" aria-label="试试一个场景">
+                <span class="preset-label">从这里开始</span>
+                <button class="preset-button" type="button" data-preset="dog" aria-pressed="false">遛狗追落叶</button>
+                <button class="preset-button" type="button" data-preset="cat" aria-pressed="false">一起读书</button>
+                <button class="preset-button" type="button" data-preset="rest" aria-pressed="false">安静陪伴</button>
+              </div>
+
+              <div class="field-group">
+                <div class="field-heading"><label for="scene">发生了什么？</label><span id="scene-count" class="character-count">0 / 600</span></div>
+                <textarea id="scene" name="scene" rows="5" maxlength="600" required spellcheck="false" aria-describedby="scene-hint scene-count" placeholder="比如：傍晚散步时，小狗追着两片落叶往前跑，我握着牵引绳跟上……"></textarea>
+                <p id="scene-hint" class="field-hint">中文或英文都可以。写清谁在做什么，保留一个具体瞬间。</p>
+              </div>
+
+              <div class="field-group objects-field">
+                <div class="field-heading"><label for="objects">画面里有哪些？</label><span id="objects-count" class="character-count">0 / 300</span></div>
+                <textarea id="objects" name="objects" rows="2" maxlength="300" required spellcheck="false" aria-describedby="objects-hint objects-count" placeholder="比如：一个简笔人物、一只小狗、牵引绳、两片落叶"></textarea>
+                <p id="objects-hint" class="field-hint">直接写入提示词，不会自动总结或补充你的故事。</p>
+              </div>
+
+              <div class="style-note"><span class="little-line" aria-hidden="true"></span><p>疏朗细线 · 大片留白 · 宠物保持四足<br><span>第二轮圆珠笔涂鸦提示词</span></p></div>
+
+              <div id="setup-note" class="setup-note" hidden><strong>先连接图像服务</strong><p>按 README 在启动服务的终端设置 <code>OPENAI_API_KEY</code> 环境变量，再重启服务；密钥不要填到网页。此时仍可编辑内容、预览和下载提示词。</p></div>
+              <p id="form-message" class="form-message" role="alert" hidden></p>
+              <button id="generate-button" class="generate-button" type="submit" disabled><span id="generate-label">正在检查配置…</span><span class="button-arrow" aria-hidden="true">↗</span></button>
+              <p class="generation-note">仅在点击生成时，才会将场景与物件发送给图像服务商，可能产生费用。</p>
+            </form>
+
+            <details id="prompt-details" class="prompt-details">
+              <summary><span>查看完整提示词</span><span id="prompt-state" class="prompt-state">等待本地服务</span><span class="details-chevron" aria-hidden="true">⌄</span></summary>
+              <div class="prompt-content">
+                <p class="prompt-explanation">下面是本地服务根据这两个输入框组装的提示词。</p>
+                <pre id="prompt-text" tabindex="0">正在连接本地服务…</pre>
+                <div class="prompt-actions"><button id="copy-prompt" class="small-button" type="button" disabled>复制提示词</button><button id="download-prompt" class="text-button" type="button" disabled>下载 .txt</button></div>
+              </div>
+            </details>
+          </section>
+
+          <section class="preview-section" aria-labelledby="preview-heading">
+            <div class="section-heading preview-heading"><span class="step-number">02</span><h2 id="preview-heading">一张小画</h2><span id="image-label" class="image-label">第二轮 prompt 示例</span></div>
+            <figure class="drawing-figure">
+              <div id="drawing-paper" class="drawing-paper" aria-busy="false">
+                <img id="doodle-image" src="/assets/sample-dog-walk.png" width="1024" height="1024" alt="第二轮提示词生成的真实示例：一个简笔人物牵着小狗追逐落叶。">
+                <div id="generation-overlay" class="generation-overlay" hidden><span class="loading-stroke" aria-hidden="true"></span><strong>正在画这一刻</strong><span>图像服务正在处理，请稍候。</span></div>
+              </div>
+              <figcaption><span id="image-caption">这张真实生成的示例供你参考。编辑左侧内容后，点击生成即可画出新场景。</span></figcaption>
+            </figure>
+            <div class="image-actions"><span id="model-label" class="model-label">白纸 · 黑色细线</span><button id="download-image" class="small-button download-image" type="button"><span aria-hidden="true">↓</span><span id="download-image-label">下载示例 PNG</span></button></div>
+            <p id="image-message" class="image-message" role="status" aria-live="polite"></p>
+          </section>
+        </div>
+      </main>
+
+      <footer class="page-footer"><span class="footer-note">你的输入只在当前页面保留，刷新后重置。提示词预览在本地完成。</span><span class="footer-signature">little moments, kept.</span></footer>
+    </div>
+    <p id="toast" class="toast" role="status" aria-live="polite" hidden></p>
+    <noscript><p class="noscript-note">请启用 JavaScript，以便编辑场景和预览提示词。上方显示的是已生成的示例图片。</p></noscript>
+  </body>
+</html>

@@ -1,6 +1,7 @@
 (() => {
   'use strict';
 
+  const isDemo = document.documentElement.dataset.mode === 'demo';
   const $ = (id) => document.getElementById(id);
   const elements = {
     form: $('doodle-form'), scene: $('scene'), objects: $('objects'),
@@ -12,7 +13,9 @@
     image: $('doodle-image'), imageLabel: $('image-label'), imageCaption: $('image-caption'),
     paper: $('drawing-paper'), overlay: $('generation-overlay'), model: $('model-label'),
     downloadImage: $('download-image'), downloadImageLabel: $('download-image-label'),
-    imageMessage: $('image-message'), toast: $('toast')
+    imageMessage: $('image-message'), toast: $('toast'),
+    demoNotice: $('demo-notice'), generationNote: $('generation-note'),
+    promptExplanation: $('prompt-explanation'), footerNote: $('footer-note')
   };
 
   const presets = {
@@ -76,8 +79,8 @@
 
   function updateButtons() {
     const valid = !validity();
-    elements.generate.disabled = !state.configReady || !state.config?.configured || !valid || state.generating || state.configLoading;
-    elements.generateLabel.textContent = state.generating ? '正在生成…' : state.configLoading ? '正在检查配置…' : state.configReady && state.config?.configured ? '生成这幅小画' : '连接服务后生成';
+    elements.generate.disabled = isDemo || !state.configReady || !state.config?.configured || !valid || state.generating || state.configLoading;
+    elements.generateLabel.textContent = isDemo ? '新图需本地配置 key' : state.generating ? '正在生成…' : state.configLoading ? '正在检查配置…' : state.configReady && state.config?.configured ? '生成这幅小画' : '连接服务后生成';
     const promptReady = !!state.prompt && state.promptSnapshot === snapshot();
     elements.copyPrompt.disabled = !promptReady;
     elements.downloadPrompt.disabled = !promptReady;
@@ -98,7 +101,9 @@
   function updateImageCaption() {
     if (!state.generatedImage) {
       elements.imageLabel.textContent = '第二轮 prompt 示例';
-      elements.imageCaption.textContent = '这张真实生成的示例供你参考。编辑左侧内容后，点击生成即可画出新场景。';
+      elements.imageCaption.textContent = isDemo
+        ? '这是第二轮提示词此前实际生成的示例。修改场景会更新提示词，不会改变这张图片；可下载示例 PNG。'
+        : '这张真实生成的示例供你参考。编辑左侧内容后，点击生成即可画出新场景。';
       return;
     }
     const unchanged = state.imageSnapshot === snapshot();
@@ -107,6 +112,14 @@
   }
 
   async function post(path, body, signal) {
+    if (isDemo) {
+      if (path !== '/api/prompt') throw new Error('在线演示不调用图像服务。生成新图请按 README 在本地配置自己的密钥。');
+      if (!state.configReady || typeof window.DoodleDemo?.prompt !== 'function') throw new Error('演示资源尚未加载，请重新检查。');
+      if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+      const result = await window.DoodleDemo.prompt(body);
+      if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+      return result;
+    }
     if (!state.configReady || !state.config?.csrfToken) throw new Error('本地服务尚未连接，请重新检查配置。');
     const response = await fetch(path, {
       method: 'POST', credentials: 'same-origin', cache: 'no-store',
@@ -132,8 +145,8 @@
     state.promptSnapshot = '';
     updateButtons();
     if (!state.configReady) {
-      elements.promptState.textContent = '等待本地服务';
-      elements.promptText.textContent = '请连接本地服务后查看完整提示词。';
+      elements.promptState.textContent = isDemo ? '等待演示资源' : '等待本地服务';
+      elements.promptText.textContent = isDemo ? '演示资源加载后即可查看完整提示词。' : '请连接本地服务后查看完整提示词。';
       return;
     }
     const error = validity();
@@ -156,15 +169,15 @@
     try {
       const result = await post('/api/prompt', value, controller.signal);
       if (version !== state.promptVersion || inputSnapshot !== snapshot()) return;
-      if (typeof result.prompt !== 'string' || !result.prompt.trim()) throw new Error('本地服务没有返回完整提示词，请重试。');
+      if (typeof result.prompt !== 'string' || !result.prompt.trim()) throw new Error('没有返回完整提示词，请重试。');
       state.prompt = result.prompt;
       state.promptSnapshot = inputSnapshot;
       elements.promptText.textContent = result.prompt;
-      elements.promptState.textContent = '已更新 · 本地预览';
+      elements.promptState.textContent = isDemo ? '已更新 · 浏览器内预览' : '已更新 · 本地预览';
     } catch (error) {
       if (error.name === 'AbortError' || version !== state.promptVersion) return;
       elements.promptState.textContent = '预览暂不可用';
-      elements.promptText.textContent = error.message || '暂时无法生成预览，请检查本地服务。';
+      elements.promptText.textContent = error.message || (isDemo ? '演示预览暂不可用，请重新加载。' : '暂时无法生成预览，请检查本地服务。');
     } finally {
       if (version === state.promptVersion) {
         state.promptController = null;
@@ -182,17 +195,24 @@
     state.config = null;
     state.prompt = '';
     elements.configStatus.classList.remove('is-ready', 'is-error');
-    elements.configLabel.textContent = '正在检查服务';
-    elements.promptState.textContent = '等待本地服务';
-    elements.promptText.textContent = '正在连接本地服务…';
+    elements.configLabel.textContent = isDemo ? '正在加载在线演示' : '正在检查服务';
+    elements.promptState.textContent = isDemo ? '等待演示资源' : '等待本地服务';
+    elements.promptText.textContent = isDemo ? '正在加载提示词模板…' : '正在连接本地服务…';
     elements.setupNote.hidden = true;
     setMessage('');
     updateButtons();
     try {
-      const response = await fetch('/api/config', { credentials: 'same-origin', cache: 'no-store' });
-      const config = await response.json();
+      let config;
+      if (isDemo) {
+        if (typeof window.DoodleDemo?.config !== 'function') throw new Error('演示脚本未加载，请刷新页面后重试。');
+        config = await window.DoodleDemo.config();
+        if (!config || config.mode !== 'demo' || config.configured !== false) throw new Error('演示配置无效，请重新加载。');
+      } else {
+        const response = await fetch('/api/config', { credentials: 'same-origin', cache: 'no-store' });
+        config = await response.json();
+        if (!response.ok || !config || typeof config.csrfToken !== 'string' || !config.csrfToken || typeof config.configured !== 'boolean') throw new Error('无法读取本地服务配置，请确认服务已启动。');
+      }
       if (version !== state.configVersion) return;
-      if (!response.ok || typeof config.csrfToken !== 'string' || !config.csrfToken || typeof config.configured !== 'boolean') throw new Error('无法读取本地服务配置，请确认服务已启动。');
       state.config = config;
       state.configReady = true;
       if (typeof config.defaults?.scene === 'string' && typeof config.defaults?.objects === 'string') {
@@ -204,23 +224,23 @@
         elements[name].maxLength = state.limits[name];
         if (!state.edited && typeof config.defaults?.[name] === 'string') elements[name].value = config.defaults[name];
       }
-      elements.configLabel.textContent = config.configured ? '图像服务已就绪' : '尚未连接图像服务';
-      elements.configStatus.classList.toggle('is-ready', config.configured);
-      elements.setupNote.hidden = config.configured;
-      elements.retry.hidden = config.configured;
-      elements.model.textContent = config.configured && typeof config.model === 'string' ? `图像模型 · ${config.model}` : '白纸 · 黑色细线';
+      elements.configLabel.textContent = isDemo ? '在线演示 · 提示词可编辑' : config.configured ? '图像服务已就绪' : '尚未连接图像服务';
+      elements.configStatus.classList.toggle('is-ready', isDemo || config.configured);
+      elements.setupNote.hidden = isDemo || config.configured;
+      elements.retry.hidden = isDemo || config.configured;
+      elements.model.textContent = isDemo ? '示例图 · 已有真实生成结果' : config.configured && typeof config.model === 'string' ? `图像模型 · ${config.model}` : '白纸 · 黑色细线';
       updateCounters();
       updatePresets();
       updateImageCaption();
       queuePrompt(true);
     } catch (error) {
       if (version !== state.configVersion) return;
-      elements.configLabel.textContent = '本地服务未连接';
+      elements.configLabel.textContent = isDemo ? '演示资源加载失败' : '本地服务未连接';
       elements.configStatus.classList.add('is-error');
       elements.retry.hidden = false;
-      elements.promptState.textContent = '等待本地服务';
-      elements.promptText.textContent = '本地服务暂不可用。连接后即可预览提示词。';
-      setMessage(error.message || '无法连接本地服务，请检查服务后重新尝试。');
+      elements.promptState.textContent = isDemo ? '等待演示资源' : '等待本地服务';
+      elements.promptText.textContent = isDemo ? '演示资源暂不可用，重新加载后即可预览提示词。' : '本地服务暂不可用。连接后即可预览提示词。';
+      setMessage(error.message || (isDemo ? '无法加载演示资源，请刷新页面后重试。' : '无法连接本地服务，请检查服务后重新尝试。'));
     } finally {
       if (version === state.configVersion) { state.configLoading = false; updateButtons(); }
     }
@@ -237,6 +257,10 @@
 
   async function generate(event) {
     event.preventDefault();
+    if (isDemo) {
+      setMessage('在线演示仅提供提示词预览与示例下载。生成新图请按 README 在本地配置自己的 API key。');
+      return;
+    }
     if (state.generating) return;
     const error = validity();
     if (error) { setMessage(error); elements.scene.focus(); return; }
@@ -308,7 +332,7 @@
       let blob;
       if (state.generatedImage) blob = pngBlob(state.generatedImage);
       else {
-        const response = await fetch('/assets/sample-dog-walk.png', { credentials: 'same-origin' });
+        const response = await fetch('./assets/sample-dog-walk.png', { credentials: 'same-origin' });
         if (!response.ok) throw new Error('示例图片暂时无法下载，请重试。');
         blob = await response.blob();
       }
@@ -355,6 +379,14 @@
   });
   elements.scene.value = presets.dog.scene;
   elements.objects.value = presets.dog.objects;
+  if (isDemo) {
+    elements.demoNotice.hidden = false;
+    elements.generationNote.textContent = '在线演示不会发送你的输入，也不会调用图像模型或产生图像 API 费用。生成新图请按下方 README 在本地运行。';
+    elements.promptExplanation.textContent = '下面是浏览器根据这两个输入框和固定 v2 模板直接组装的提示词；输入不会发送到服务器。';
+    elements.footerNote.textContent = '输入仅留在当前页面，刷新后重置。提示词在浏览器内组装，不需要图像服务密钥。';
+    elements.promptDetails.open = true;
+  }
+  updateImageCaption();
   updateCounters();
   updatePresets();
   loadConfig();

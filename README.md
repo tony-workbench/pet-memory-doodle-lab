@@ -2,13 +2,26 @@
 
 把一段与宠物相处的小事，变成一张稀疏的黑白圆珠笔涂鸦。中文网页，本地运行，Python 标准库后端，无需安装第三方依赖。
 
+**[打开在线演示](https://pet-memory-doodle-lab.yunganghu04.chatgpt.site)** · **[阅读完整设计说明](docs/DESIGN.md)**
+
+在线演示可以直接编辑场景、查看/复制/下载 prompt、查看和下载已生成的示例图，并了解实现方法。它不提供实时付费出图；需要生成新图时，clone 这个项目，在自己的电脑上配置 API 密钥后运行。演示与本地应用使用同一份第二轮 prompt 模板。
+
 ![第二轮 prompt 的实际生成示例](static/assets/sample-dog-walk.png)
+
+## 从哪里开始看
+
+- 先体验在线演示，展开“查看完整提示词”，观察输入如何改变最终 prompt。
+- 想了解为什么这样做：读 [设计、数据流与文件地图](docs/DESIGN.md)。
+- 想直接接入自己的 APP：看 `prompt_builder.py`、`app.py` 和设计说明中的集成步骤。
+- 想部署自己的展示页：按下方“构建和托管自己的演示”操作。
 
 ## 本地运行
 
 需要 Python 3.9 或更新版本：
 
 ```sh
+git clone https://github.com/tony-workbench/pet-memory-doodle-lab.git
+cd pet-memory-doodle-lab
 python3 app.py
 ```
 
@@ -49,6 +62,19 @@ python3 app.py
 
 所有 POST 请求都校验同源请求与本地会话令牌。密钥只留在服务端进程；程序不输出密钥、日记、请求头或第三方错误正文。代码不包含分析脚本、远程字体或第三方前端依赖。
 
+## 构建和托管自己的演示
+
+```sh
+python3 scripts/build_demo.py
+python3 -m http.server 8768 --bind 127.0.0.1 --directory demo/dist
+```
+
+打开 <http://127.0.0.1:8768> 即可检查纯静态版本。构建会从原模板读取默认值，再复制所需界面和示例资源到 `demo/dist/`；不会复制 Python 服务、密钥、Git 历史或私有工作文件。不要直接双击 HTML，因为浏览器需要通过 HTTP 读取静态配置文件。
+
+把 `demo/dist/` 的内容交给你自己的静态托管即可，网站入口是 `index.html`。本项目的在线演示使用 Sites，仓库不包含发布凭据或专属于作者的托管项目配置。重新托管时，创建你自己的站点，并按托管平台配置响应头；页面也包含静态 CSP 限制。
+
+静态演示在浏览器内组合 prompt，不请求本地 `/api` 或图像服务；输入不会被这个应用发送到模型。托管平台可能记录普通访问日志。API 密钥和真正的图像生成后端不属于静态部署内容。
+
 ## 验证与适用范围
 
 ```sh
@@ -56,5 +82,7 @@ python3 -m unittest discover -s tests -v
 ```
 
 测试覆盖 prompt 一致性、本地 HTTP 边界、恶意输入、错误处理和模拟的图像 API 响应。模拟测试不等同于真实付费 API 调用；交付时未配置 API 密钥，因此真实新图生成尚未在这个独立工具内验证。
+
+静态演示的构建和浏览器 prompt 组合也有测试；JavaScript 一致性测试需要 Node.js（仅开发测试需要，网页访客不需要安装）。构建结果不应被手工修改，修改源码后重新构建。
 
 这是单人本地原型。请勿把它改成监听公网后直接作为多用户服务；线上产品还需要身份验证、配额、存储与部署设计。安全检查范围与结果见 [SECURITY.md](SECURITY.md)。

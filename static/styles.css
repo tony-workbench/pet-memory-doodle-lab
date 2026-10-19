@@ -27,6 +27,9 @@ a { color: inherit; }
 .brand-mark { font-family: Georgia, serif; display: block; font-size: 42px; font-weight: 400; color: var(--blue); transform: rotate(-12deg); }
 .wordmark-sub { display: block; font-family: var(--font); font-size: 9px; font-weight: 600; letter-spacing: 3.4px; margin-top: 7px; }
 .connection { display: flex; align-items: center; gap: 14px; }
+.design-jump { color: #69796e; font-size: 11px; text-decoration: none; margin-right: 9px; white-space: nowrap; }
+.design-jump span { margin-left: 5px; }
+.design-jump:hover { color: var(--blue-dark); }
 .status-pill { color: #777a72; font-size: 11px; display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
 .status-dot { width: 6px; height: 6px; flex: 0 0 6px; border-radius: 50%; background: #a4a69c; }
 .status-pill.is-ready .status-dot { background: #77927b; }
@@ -39,6 +42,9 @@ a { color: inherit; }
 h1 { margin: 0; font-size: clamp(28px, 3.4vw, 39px); line-height: 1.5; font-weight: 500; letter-spacing: 1.5px; }
 .mobile-break { display: none; }
 .intro-copy { margin: 14px 0 0; font-size: 13px; color: #828277; line-height: 1.9; letter-spacing: .2px; }
+.demo-notice { display: flex; gap: 16px; align-items: baseline; border-left: 2px solid #a8bdca; padding: 1px 0 1px 15px; margin: -12px 0 34px; }
+.demo-notice-label { flex: 0 0 auto; color: var(--blue-dark); font-size: 11px; font-weight: 500; }
+.demo-notice p { margin: 0; color: #7d877b; font-size: 11px; line-height: 1.9; max-width: 750px; }
 .workspace { display: grid; grid-template-columns: minmax(0, .96fr) minmax(0, 1.04fr); gap: 64px; align-items: start; }
 .section-heading { display: flex; align-items: baseline; gap: 11px; margin-bottom: 25px; }
 .section-heading h2 { font-size: 14px; font-weight: 600; margin: 0; letter-spacing: .6px; }
@@ -105,6 +111,32 @@ textarea:disabled { background: #eeeee7; color: #8d8f85; }
 .generation-overlay strong { font-size: 14px; font-weight: 500; letter-spacing: 1px; }
 .generation-overlay > span:last-child { font-size: 10px; color: #8d9a8f; }
 .loading-stroke { height: 28px; width: 28px; border: 1px solid #c4cfc6; border-top-color: #678373; border-right-color: #678373; border-radius: 47%; animation: pencil-turn 1.5s linear infinite; margin-bottom: 5px; }
+.design-section { margin-top: 65px; border-top: 1px solid var(--line); padding-top: 42px; scroll-margin-top: 24px; }
+.design-intro { display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; margin-bottom: 31px; }
+.design-intro .eyebrow { margin-bottom: 13px; }
+.design-intro h2 { font-size: 24px; font-weight: 500; letter-spacing: 1px; margin: 0; }
+.design-intro > p { max-width: 390px; font-size: 12px; line-height: 1.9; color: #7c8277; margin: 0; }
+.design-flow { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 38px; margin: 0 0 37px; padding: 28px 0; border-top: 1px solid #e1e2d8; border-bottom: 1px solid #e1e2d8; }
+.design-flow li { position: relative; display: flex; align-items: flex-start; gap: 13px; }
+.design-flow li:not(:last-child)::after { content: "→"; position: absolute; right: -24px; top: 4px; color: #acb4a7; font-size: 13px; }
+.flow-number { color: #8e9e91; font-size: 22px; font-style: italic; line-height: 1.25; font-family: Georgia, serif; }
+.design-flow h3 { margin: 0 0 9px; font-size: 13px; font-weight: 500; }
+.design-flow p { margin: 0; font-size: 11px; line-height: 1.9; color: #858b80; }
+.design-notes { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 76px; }
+.design-subheading { margin: 0 0 19px; font-size: 13px; font-weight: 500; color: #586b5e; letter-spacing: .3px; }
+.design-choices { margin: 0; }
+.design-choices > div { margin-bottom: 17px; }
+.design-choices dt { font-size: 12px; font-weight: 500; margin-bottom: 5px; color: #5f6d61; }
+.design-choices dd { font-size: 11px; line-height: 1.9; margin: 0; color: #828b7d; }
+.reuse-guide > p { margin: 0 0 17px; font-size: 11px; line-height: 1.9; color: #828b7d; }
+.code-map { margin: 0 0 21px; padding: 1px 0; }
+.code-map > div { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; padding: 9px 0; border-bottom: 1px solid #e3e5da; }
+.code-map dt { min-width: 0; }
+.code-map code { color: #6b8073; font-size: 10px; overflow-wrap: anywhere; }
+.code-map dd { font-size: 10px; color: #909889; margin: 0; flex: 0 0 auto; }
+.reuse-links { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.reuse-links .small-button { text-decoration: none; }
+.reuse-guide .repository-access { color: #959c90; font-size: 10px; margin-top: 14px; }
 .page-footer { display: flex; justify-content: space-between; align-items: baseline; gap: 30px; margin-top: 53px; padding: 24px 0 28px; border-top: 1px solid var(--line); }
 .footer-note { font-size: 9px; line-height: 1.8; color: #a0a396; }
 .footer-signature { flex: 0 0 auto; font-family: Georgia, "Times New Roman", serif; font-style: italic; font-size: 12px; color: #909b8d; }
@@ -127,6 +159,7 @@ textarea:disabled { background: #eeeee7; color: #8d8f85; }
   .brand-mark { font-size: 35px; }
   .wordmark-sub { font-size: 8px; letter-spacing: 2.8px; }
   .connection { align-items: flex-end; flex-direction: column; gap: 3px; }
+  .design-jump { font-size: 9px; margin-right: 0; margin-bottom: 3px; }
   .status-pill { font-size: 9px; }
   .config-retry { font-size: 9px !important; }
   .intro { padding: 35px 0 33px; }
@@ -134,6 +167,8 @@ textarea:disabled { background: #eeeee7; color: #8d8f85; }
   h1 { font-size: 31px; line-height: 1.55; letter-spacing: 1px; }
   .mobile-break { display: block; }
   .intro-copy { font-size: 12px; line-height: 1.95; margin-top: 12px; max-width: 330px; }
+  .demo-notice { gap: 6px; flex-direction: column; margin: -4px 0 29px; padding-left: 12px; }
+  .demo-notice p { font-size: 11px; }
   .workspace { grid-template-columns: minmax(0, 1fr); gap: 39px; }
   .section-heading { margin-bottom: 21px; }
   .presets { margin-bottom: 23px; gap: 7px; }
@@ -150,6 +185,20 @@ textarea:disabled { background: #eeeee7; color: #8d8f85; }
   .image-actions { margin-top: 12px; }
   .small-button { min-height: 38px; font-size: 11px; }
   .prompt-actions .text-button { font-size: 11px; }
+  .design-section { margin-top: 32px; padding-top: 32px; }
+  .design-intro { display: block; margin-bottom: 23px; }
+  .design-intro h2 { font-size: 23px; }
+  .design-intro > p { margin-top: 14px; max-width: none; }
+  .design-flow { grid-template-columns: minmax(0, 1fr); gap: 24px; padding: 25px 0; margin-bottom: 28px; }
+  .design-flow li { gap: 15px; }
+  .design-flow li:not(:last-child)::after { content: none; }
+  .design-flow h3 { font-size: 13px; margin-bottom: 6px; }
+  .design-flow p, .design-choices dd, .reuse-guide > p { font-size: 12px; }
+  .design-notes { grid-template-columns: minmax(0, 1fr); gap: 25px; }
+  .design-subheading { font-size: 14px; }
+  .design-choices dt { font-size: 13px; }
+  .code-map code, .code-map dd { font-size: 11px; }
+  .reuse-guide .repository-access { font-size: 10px; }
   .page-footer { margin-top: 27px; padding-top: 21px; gap: 15px; align-items: flex-start; }
   .footer-note { max-width: 210px; }
   .footer-signature { font-size: 11px; }

@@ -15,4 +15,5 @@ coverage/
 generated/
 private/
 work/
-
+demo/dist/
+.openai/

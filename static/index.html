@@ -5,18 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f6f4ed">
     <title>Pet Memory Doodle Lab · 宠物记忆小画室</title>
-    <link rel="stylesheet" href="/styles.css">
-    <script src="/app.js" defer></script>
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./app.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#scene">跳到场景输入</a>
     <div class="page-shell">
       <header class="masthead">
-        <a class="wordmark" href="/" aria-label="Pet Memory Doodle Lab 首页">
+        <a class="wordmark" href="./" aria-label="Pet Memory Doodle Lab 首页">
           <span class="brand-mark" aria-hidden="true">✳</span>
           <span>Pet Memory<span class="wordmark-sub">DOODLE LAB</span></span>
         </a>
         <div class="connection">
+          <a class="design-jump" href="#design">设计与复用 <span aria-hidden="true">↓</span></a>
           <span id="config-status" class="status-pill" role="status"><span class="status-dot" aria-hidden="true"></span><span id="config-label">正在检查服务</span></span>
           <button id="config-retry" class="text-button config-retry" type="button" hidden>重新检查</button>
         </div>
@@ -28,6 +29,11 @@
           <h1 id="page-title">和它的一刻，<br class="mobile-break">留在纸上。</h1>
           <p class="intro-copy">写下一个小场景，用几笔黑色圆珠笔线条，画成一张宠物记忆。</p>
         </section>
+
+        <div id="demo-notice" class="demo-notice" hidden>
+          <span class="demo-notice-label">在线演示</span>
+          <p>试着修改场景，查看、复制或下载完整提示词。右侧为已有的真实生成示例；新图需在本地配置自己的 API key。</p>
+        </div>
 
         <div class="workspace">
           <section class="editor" aria-labelledby="editor-heading">
@@ -57,13 +63,13 @@
               <div id="setup-note" class="setup-note" hidden><strong>先连接图像服务</strong><p>按 README 在启动服务的终端设置 <code>OPENAI_API_KEY</code> 环境变量，再重启服务；密钥不要填到网页。此时仍可编辑内容、预览和下载提示词。</p></div>
               <p id="form-message" class="form-message" role="alert" hidden></p>
               <button id="generate-button" class="generate-button" type="submit" disabled><span id="generate-label">正在检查配置…</span><span class="button-arrow" aria-hidden="true">↗</span></button>
-              <p class="generation-note">仅在点击生成时，才会将场景与物件发送给图像服务商，可能产生费用。</p>
+              <p id="generation-note" class="generation-note">仅在点击生成时，才会将场景与物件发送给图像服务商，可能产生费用。</p>
             </form>
 
             <details id="prompt-details" class="prompt-details">
               <summary><span>查看完整提示词</span><span id="prompt-state" class="prompt-state">等待本地服务</span><span class="details-chevron" aria-hidden="true">⌄</span></summary>
               <div class="prompt-content">
-                <p class="prompt-explanation">下面是本地服务根据这两个输入框组装的提示词。</p>
+                <p id="prompt-explanation" class="prompt-explanation">下面是本地服务根据这两个输入框组装的提示词。</p>
                 <pre id="prompt-text" tabindex="0">正在连接本地服务…</pre>
                 <div class="prompt-actions"><button id="copy-prompt" class="small-button" type="button" disabled>复制提示词</button><button id="download-prompt" class="text-button" type="button" disabled>下载 .txt</button></div>
               </div>
@@ -74,7 +80,7 @@
             <div class="section-heading preview-heading"><span class="step-number">02</span><h2 id="preview-heading">一张小画</h2><span id="image-label" class="image-label">第二轮 prompt 示例</span></div>
             <figure class="drawing-figure">
               <div id="drawing-paper" class="drawing-paper" aria-busy="false">
-                <img id="doodle-image" src="/assets/sample-dog-walk.png" width="1024" height="1024" alt="第二轮提示词生成的真实示例：一个简笔人物牵着小狗追逐落叶。">
+                <img id="doodle-image" src="./assets/sample-dog-walk.png" width="1024" height="1024" alt="第二轮提示词生成的真实示例：一个简笔人物牵着小狗追逐落叶。">
                 <div id="generation-overlay" class="generation-overlay" hidden><span class="loading-stroke" aria-hidden="true"></span><strong>正在画这一刻</strong><span>图像服务正在处理，请稍候。</span></div>
               </div>
               <figcaption><span id="image-caption">这张真实生成的示例供你参考。编辑左侧内容后，点击生成即可画出新场景。</span></figcaption>
@@ -83,9 +89,48 @@
             <p id="image-message" class="image-message" role="status" aria-live="polite"></p>
           </section>
         </div>
+
+        <section id="design" class="design-section" aria-labelledby="design-heading">
+          <div class="design-intro">
+            <div><p class="eyebrow">BEHIND THE LITTLE DRAWING</p><h2 id="design-heading">设计与复用</h2></div>
+            <p>一套简单、可检查的流程。你可以带走提示词，也可以按 README 在自己的电脑上运行。</p>
+          </div>
+
+          <ol class="design-flow" aria-label="从场景到小画的三个步骤">
+            <li><span class="flow-number">1</span><div><h3>输入场景</h3><p>描述一个动作，并列出需要保留的物件。直接采用你的文字，不额外调用模型总结。</p></div></li>
+            <li><span class="flow-number">2</span><div><h3>固定 v2 约束</h3><p>将场景放入第二轮提示词：细黑线、白底、少笔画、指定物件，保持宠物的四足形态。</p></div></li>
+            <li><span class="flow-number">3</span><div><h3>图像模型输出</h3><p>本地版配置密钥后，显式请求一张 PNG。在线版展示已生成的示例，不调用图像模型。</p></div></li>
+          </ol>
+
+          <div class="design-notes">
+            <div>
+              <h3 class="design-subheading">为什么这样设计</h3>
+              <dl class="design-choices">
+                <div><dt>极简，但仍然像宠物</dt><dd>减少毛发与背景细节，保留动物的四足结构，让动作成为画面的主角。</dd></div>
+                <div><dt>一份模板，反复试验</dt><dd>默认场景对齐选中的 v2 提示词；换场景时沿用同一组画风约束，便于比较结果。</dd></div>
+                <div><dt>页面和生成逻辑分开</dt><dd>前端负责输入、预览和下载；模板与图像请求各自独立，便于接进自己的产品。</dd></div>
+                <div><dt>密钥留在服务端</dt><dd>真实生成读取本地进程的环境变量。网页不接收、不保存 API key；在线演示无需密钥。</dd></div>
+                <div><dt>示例就是示例</dt><dd>已有图片始终明确标注。编辑文字只更新提示词，不播放虚假的生成过程。</dd></div>
+              </dl>
+            </div>
+
+            <aside class="reuse-guide" aria-labelledby="reuse-heading">
+              <h3 id="reuse-heading" class="design-subheading">从哪里开始复用</h3>
+              <p>先下载完整提示词，再查看对应代码。运行命令、密钥设置与验证方法都在 README 中。</p>
+              <dl class="code-map">
+                <div><dt><code>static/</code></dt><dd>页面、输入与下载</dd></div>
+                <div><dt><code>prompt_builder.py</code></dt><dd>模板与场景拼装</dd></div>
+                <div><dt><code>app.py</code></dt><dd>本地服务与图像 API</dd></div>
+                <div><dt><code>demo/demo-adapter.js</code></dt><dd>浏览器内的演示预览</dd></div>
+              </dl>
+              <div class="reuse-links"><a class="small-button" href="https://github.com/tony-workbench/pet-memory-doodle-lab#readme" target="_blank" rel="noopener noreferrer">阅读 README <span aria-hidden="true">↗</span></a><a class="text-button" href="https://github.com/tony-workbench/pet-memory-doodle-lab" target="_blank" rel="noopener noreferrer">查看代码仓库</a></div>
+              <p class="repository-access">完整源码和设计说明在公开仓库，可直接查看或 clone 复用。</p>
+            </aside>
+          </div>
+        </section>
       </main>
 
-      <footer class="page-footer"><span class="footer-note">你的输入只在当前页面保留，刷新后重置。提示词预览在本地完成。</span><span class="footer-signature">little moments, kept.</span></footer>
+      <footer class="page-footer"><span id="footer-note" class="footer-note">你的输入只在当前页面保留，刷新后重置。提示词预览在本地完成。</span><span class="footer-signature">little moments, kept.</span></footer>
     </div>
     <p id="toast" class="toast" role="status" aria-live="polite" hidden></p>
     <noscript><p class="noscript-note">请启用 JavaScript，以便编辑场景和预览提示词。上方显示的是已生成的示例图片。</p></noscript>

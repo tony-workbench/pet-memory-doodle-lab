@@ -2,6 +2,14 @@
 
 This is a single-user local prototype. Its intended trust boundary is a browser on the same computer connecting to a loopback-only Python process. Local programs running as the same user are trusted; the application is not a sandbox against a compromised computer.
 
+The hosted demonstration is a separate static-only build. It contains the selected public prompt, interface, design notes, and generated sample image. It has no image-generation server, API key, authentication secret, user database, or writable API. The source repository and hosted demo are public with the owner's approval.
+
+## Hosted demo boundary
+
+The browser downloads fixed static assets and constructs the prompt locally. Editing text does not submit it to the provider or the hosting server. Copying and downloading are explicit browser actions. No analytics or third-party scripts are bundled; ordinary hosting access logs remain outside the app's control. The existing Python server is not exposed by deploying the static demo.
+
+The build script selects explicit files and does not include `.git`, Python sources, environment files, scan reports, or private research material in the deployment package. The app uses text rendering for user input, a static Content Security Policy, and relative same-site asset URLs. Public source includes only the reusable implementation and documentation; publishing never requires putting credentials in Git.
+
 ## Data flow
 
 Scene and object descriptions are sent to the local server to build a prompt. Clicking Generate sends that prompt, and only that prompt plus fixed image options, to the OpenAI Images API over HTTPS. The server supplies `OPENAI_API_KEY` from its process environment. API responses contain a generated image, never the key. Browser edits and generated results are not persisted by this application. Downloaded files remain wherever the user saves them. The image provider's own data handling is outside this local implementation.

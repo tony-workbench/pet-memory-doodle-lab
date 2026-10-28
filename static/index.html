@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f6f4ed">
+    <title>Pet Memory Doodle Lab</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#scene">Skip to the scene</a>
+    <div class="page-shell">
+      <header class="masthead">
+        <a class="wordmark" href="./" aria-label="Pet Memory Doodle Lab home">
+          <span class="brand-mark" aria-hidden="true">✳</span>
+          <span>Pet Memory<span class="wordmark-sub">DOODLE LAB</span></span>
+        </a>
+        <div class="connection">
+          <a class="design-jump" href="#design">Design and reuse <span aria-hidden="true">↓</span></a>
+          <span id="config-status" class="status-pill" role="status"><span class="status-dot" aria-hidden="true"></span><span id="config-label">Checking the service</span></span>
+          <button id="config-retry" class="text-button config-retry" type="button" hidden>Check again</button>
+        </div>
+      </header>
+
+      <main>
+        <section class="intro" aria-labelledby="page-title">
+          <p class="eyebrow">A SMALL MOMENT, A FEW LITTLE LINES.</p>
+          <h1 id="page-title">A moment together,<br class="mobile-break"> kept on paper.</h1>
+          <p class="intro-copy">Write a small scene and turn it into a pet memory drawn in a few black ballpoint-pen lines.</p>
+        </section>
+
+        <div id="demo-notice" class="demo-notice" hidden>
+          <span class="demo-notice-label">Online demo</span>
+          <p>Try changing the scene, then view, copy or download the full prompt. The image is a real sample made earlier; to make new images, run the app locally with your own API key.</p>
+        </div>
+
+        <div class="workspace">
+          <section class="editor" aria-labelledby="editor-heading">
+            <div class="section-heading"><span class="step-number">01</span><h2 id="editor-heading">Write down the moment</h2></div>
+            <form id="doodle-form">
+              <div class="presets" aria-label="Try a scene">
+                <span class="preset-label">Start here</span>
+                <button class="preset-button" type="button" data-preset="dog" aria-pressed="false">Dog chasing leaves</button>
+                <button class="preset-button" type="button" data-preset="cat" aria-pressed="false">Reading together</button>
+                <button class="preset-button" type="button" data-preset="rest" aria-pressed="false">Quiet company</button>
+              </div>
+
+              <div class="field-group">
+                <div class="field-heading"><label for="scene">What happened?</label><span id="scene-count" class="character-count">0 / 600</span></div>
+                <textarea id="scene" name="scene" rows="5" maxlength="600" required spellcheck="false" aria-describedby="scene-hint scene-count" placeholder="For example: on an evening walk my dog ran after two falling leaves, and I hurried after it holding the leash…"></textarea>
+                <p id="scene-hint" class="field-hint">English or Chinese both work. Say who is doing what, and keep to one moment.</p>
+              </div>
+
+              <div class="field-group objects-field">
+                <div class="field-heading"><label for="objects">What is in the picture?</label><span id="objects-count" class="character-count">0 / 300</span></div>
+                <textarea id="objects" name="objects" rows="2" maxlength="300" required spellcheck="false" aria-describedby="objects-hint objects-count" placeholder="For example: a stick figure, a small dog, a leash, two falling leaves"></textarea>
+                <p id="objects-hint" class="field-hint">Goes into the prompt as written. Your story is never summarized or added to.</p>
+              </div>
+
+              <div class="style-note"><span class="little-line" aria-hidden="true"></span><p>Sparse thin lines · lots of white space · pets keep four legs<br><span>v2 ballpoint doodle prompt</span></p></div>
+
+              <div id="setup-note" class="setup-note" hidden><strong>Connect the image service first</strong><p>Follow the README: set the <code>OPENAI_API_KEY</code> environment variable in the terminal that runs the server, then restart it. Never type the key into this page. Until then you can still edit, preview and download the prompt.</p></div>
+              <p id="form-message" class="form-message" role="alert" hidden></p>
+              <button id="generate-button" class="generate-button" type="submit" disabled><span id="generate-label">Checking setup…</span><span class="button-arrow" aria-hidden="true">↗</span></button>
+              <p id="generation-note" class="generation-note">The scene and objects are sent to the image provider only when you click Generate, which may cost money.</p>
+            </form>
+
+            <details id="prompt-details" class="prompt-details">
+              <summary><span>See the full prompt</span><span id="prompt-state" class="prompt-state">Waiting for the local server</span><span class="details-chevron" aria-hidden="true">⌄</span></summary>
+              <div class="prompt-content">
+                <p id="prompt-explanation" class="prompt-explanation">Below is the prompt the local server built from the two boxes above.</p>
+                <pre id="prompt-text" tabindex="0">Connecting to the local server…</pre>
+                <div class="prompt-actions"><button id="copy-prompt" class="small-button" type="button" disabled>Copy prompt</button><button id="download-prompt" class="text-button" type="button" disabled>Download .txt</button></div>
+              </div>
+            </details>
+          </section>
+
+          <section class="preview-section" aria-labelledby="preview-heading">
+            <div class="section-heading preview-heading"><span class="step-number">02</span><h2 id="preview-heading">A little drawing</h2><span id="image-label" class="image-label">v2 prompt sample</span></div>
+            <figure class="drawing-figure">
+              <div id="drawing-paper" class="drawing-paper" aria-busy="false">
+                <img id="doodle-image" src="./assets/sample-dog-walk.png" width="1024" height="1024" alt="A real sample made with the v2 prompt: a stick figure walking a small dog that chases falling leaves.">
+                <div id="generation-overlay" class="generation-overlay" hidden><span class="loading-stroke" aria-hidden="true"></span><strong>Drawing this moment</strong><span>The image service is working. Please wait.</span></div>
+              </div>
+              <figcaption><span id="image-caption">This real sample is here for reference. Edit the scene, then click Generate to draw a new one.</span></figcaption>
+            </figure>
+            <div class="image-actions"><span id="model-label" class="model-label">White paper · thin black lines</span><button id="download-image" class="small-button download-image" type="button"><span aria-hidden="true">↓</span><span id="download-image-label">Download sample PNG</span></button></div>
+            <p id="image-message" class="image-message" role="status" aria-live="polite"></p>
+          </section>
+        </div>
+
+        <section id="design" class="design-section" aria-labelledby="design-heading">
+          <div class="design-intro">
+            <div><p class="eyebrow">BEHIND THE LITTLE DRAWING</p><h2 id="design-heading">Design and reuse</h2></div>
+            <p>A simple process you can check. Take the prompt with you, or follow the README to run it on your own computer.</p>
+          </div>
+
+          <ol class="design-flow" aria-label="Three steps from scene to drawing">
+            <li><span class="flow-number">1</span><div><h3>Write the scene</h3><p>Describe an action and list the objects to keep. Your words are used as written; no model summarizes them.</p></div></li>
+            <li><span class="flow-number">2</span><div><h3>Apply the fixed v2 rules</h3><p>The scene goes into the v2 prompt: thin black lines, white background, few strokes, only the listed objects, and pets with four legs.</p></div></li>
+            <li><span class="flow-number">3</span><div><h3>Image model output</h3><p>With a key set, the local app asks for one PNG when you click Generate. The online demo shows an existing sample and never calls the image model.</p></div></li>
+          </ol>
+
+          <div class="design-notes">
+            <div>
+              <h3 class="design-subheading">Why it works this way</h3>
+              <dl class="design-choices">
+                <div><dt>Minimal, but still a pet</dt><dd>Less fur and background detail, but the animal keeps its four legs, so the action is the focus.</dd></div>
+                <div><dt>One template for every try</dt><dd>The default scene matches the chosen v2 prompt. New scenes keep the same style rules, so results are easy to compare.</dd></div>
+                <div><dt>Page and generation kept apart</dt><dd>The page handles input, preview and downloads. The template and the image request are separate, so they are easy to move into your own product.</dd></div>
+                <div><dt>The key stays on the server</dt><dd>Real generation reads the key from the local server's environment. The page never receives or stores an API key, and the online demo needs none.</dd></div>
+                <div><dt>A sample is labeled as a sample</dt><dd>The existing image is always marked as a sample. Editing text only updates the prompt; no fake generation is shown.</dd></div>
+              </dl>
+            </div>
+
+            <aside class="reuse-guide" aria-labelledby="reuse-heading">
+              <h3 id="reuse-heading" class="design-subheading">Where to start reusing it</h3>
+              <p>Download the full prompt first, then read the matching code. Run commands, key setup and tests are in the README.</p>
+              <dl class="code-map">
+                <div><dt><code>static/</code></dt><dd>Page, inputs and downloads</dd></div>
+                <div><dt><code>prompt_builder.py</code></dt><dd>Template and scene filling</dd></div>
+                <div><dt><code>app.py</code></dt><dd>Local server and image API</dd></div>
+                <div><dt><code>demo/demo-adapter.js</code></dt><dd>In-browser demo preview</dd></div>
+              </dl>
+              <div class="reuse-links"><a class="small-button" href="https://github.com/tony-workbench/pet-memory-doodle-lab#readme" target="_blank" rel="noopener noreferrer">Read the README <span aria-hidden="true">↗</span></a><a class="text-button" href="https://github.com/tony-workbench/pet-memory-doodle-lab" target="_blank" rel="noopener noreferrer">View the repository</a></div>
+              <p class="repository-access">The full source and design notes are in the public repository. Read them there or clone it.</p>
+            </aside>
+          </div>
+        </section>
+      </main>
+
+      <footer class="page-footer"><span id="footer-note" class="footer-note">What you type stays on this page only and is cleared on reload. The prompt preview is built locally.</span><span class="footer-signature">little moments, kept.</span></footer>
+    </div>
+    <p id="toast" class="toast" role="status" aria-live="polite" hidden></p>
+    <noscript><p class="noscript-note">Turn on JavaScript to edit the scene and preview the prompt. The image above is an existing sample.</p></noscript>
+  </body>
+</html>
